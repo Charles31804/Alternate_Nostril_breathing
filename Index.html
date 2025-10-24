@@ -1,7 +1,4 @@
-<body>
-  <!-- TIMER SECTION -->
-  <div class="wrap">
-    <!-- all of your timer HTML here --><!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -121,12 +118,39 @@
       <label class="check"><input id="soundOn" type="checkbox" checked /> Soft chime on phase change</label>
       <label class="check"><input id="vibrateOn" type="checkbox" /> Vibrate on change (mobile)</label>
       <p class="muted" style="margin-top:10px">
-        Tip: Keep each phase 4–8s. For **ANB**, the app cues Left / Right automatically.<br/>
+        Tip: Keep each phase 4–8s. For <strong>ANB</strong>, the app cues Left / Right automatically.<br/>
         Shortcuts: <span class="kbd">Space</span> start/pause • <span class="kbd">R</span> reset.
       </p>
     </aside>
   </div>
 </div>
+
+<!-- Additional content -->
+<section id="content" style="max-width:800px;margin:60px auto;padding:0 20px;line-height:1.6;">
+  <h1>Two-Job Reduced Sleep System</h1>
+  <p><em>For people running double shifts and still chasing better days.</em></p>
+
+  <h2>Intent First</h2>
+  <p>Before you breathe, before you write—set your target. <strong>"I rest to reset."</strong> Intent is the steering wheel. Without it, the body drifts.</p>
+
+  <h2>Alternate Nostril Breathing</h2>
+  <p>You’re not meditating—you’re resetting the wiring. Inhale left, exhale right, 4–8 seconds. Each breath tells your system: <strong>Calm is power.</strong></p>
+
+  <h2>Dump the Thoughts</h2>
+  <p>Pen and paper. No filters. Start with your intent, then spill the junk. The page takes the noise so your brain can do repairs.</p>
+
+  <h2>Detachment</h2>
+  <p>Catch the tricks: <em>"My mind says I’m done," "My mind says this won’t work."</em> Label it. Watch it lose its bite. You’re the operator, not the echo.</p>
+
+  <h2>Real-World Sleep Reality</h2>
+  <p>Forget the fantasy eight hours. You adapt. Quality beats quantity. Breath, intent, awareness—your three-hour armor.</p>
+
+  <h2>90-Minute Coffee Rule</h2>
+  <p>Wait before caffeine. Let your body wake itself first, then back it up with coffee. Use it like a weapon, not a crutch.</p>
+
+  <h2>Morning Oxygen Reset</h2>
+  <p>Five minutes. Shake, bounce, move. Flood the body with air, shake out the night. Say it again: <strong>"I’m awake, alert, and steady."</strong></p>
+</section>
 
 <script>
 (function(){
@@ -160,9 +184,9 @@
   let chimeBuckets = 0, lastChimeMin = 0;
 
   // Audio (WebAudio beep)
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const ctx = (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) ? new (window.AudioContext || window.webkitAudioContext)() : null;
   const beep = (dur=0.08, freq=660) => {
-    if(!soundOn.checked) return;
+    if(!soundOn.checked || !ctx) return;
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
     o.type='sine'; o.frequency.value=freq;
@@ -220,7 +244,7 @@
     return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
   }
 
-  function goalMs(){ return Math.max(1, +goalMin.value) * 60_000; }
+  function goalMs(){ return Math.max(1, +goalMin.value) * 60000; }
 
   function updatePhaseUI(){
     const p = schedule[phaseIndex] || {name:'Ready',nostril:'—',dur:0};
@@ -282,7 +306,7 @@
   }
 
   const staticSecondTimer = (function(){
-    // Ensures we run our "per second" actions roughly once per second independent of requestAnimationFrame
+    // Ensures we run our "per second" actions roughly once per second independent of setInterval frequency
     let last = Date.now();
     return {
       next(cb){
@@ -351,33 +375,4 @@
 })();
 </script>
 </body>
-</html>
-  </div>
-
-  <!-- CONTENT SECTION -->
-  <section id="content" style="max-width:800px;margin:60px auto;padding:0 20px;line-height:1.6;">
-    <h1>Two-Job Reduced Sleep System</h1>
-    <p><em>For people running double shifts and still chasing better days.</em></p>
-
-    <h2>Intent First</h2>
-    <p>Before you breathe, before you write—set your target. <strong>"I rest to reset."</strong> Intent is the steering wheel. Without it, the body drifts.</p>
-
-    <h2>Alternate Nostril Breathing</h2>
-    <p>You’re not meditating—you’re resetting the wiring. Inhale left, exhale right, 4–8 seconds. Each breath tells your system: <strong>Calm is power.</strong></p>
-
-    <h2>Dump the Thoughts</h2>
-    <p>Pen and paper. No filters. Start with your intent, then spill the junk. The page takes the noise so your brain can do repairs.</p>
-
-    <h2>Detachment</h2>
-    <p>Catch the tricks: <em>"My mind says I’m done," "My mind says this won’t work."</em> Label it. Watch it lose its bite. You’re the operator, not the echo.</p>
-
-    <h2>Real-World Sleep Reality</h2>
-    <p>Forget the fantasy eight hours. You adapt. Quality beats quantity. Breath, intent, awareness—your three-hour armor.</p>
-
-    <h2>90-Minute Coffee Rule</h2>
-    <p>Wait before caffeine. Let your body wake itself first, then back it up with coffee. Use it like a weapon, not a crutch.</p>
-
-    <h2>Morning Oxygen Reset</h2>
-    <p>Five minutes. Shake, bounce, move. Flood the body with air, shake out the night. Say it again: <strong>"I’m awake, alert, and steady."</strong></p>
-  </section>
-</body>
+</html>p
