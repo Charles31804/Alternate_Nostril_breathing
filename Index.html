@@ -1,1 +1,383 @@
+<body>
+  <!-- TIMER SECTION -->
+  <div class="wrap">
+    <!-- all of your timer HTML here --><!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Alternate Nostril Breathing Timer</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#151922; --ink:#e9eef8; --muted:#a9b3c7;
+    --accent:#7ad1ff; --accent2:#b6ff9c; --danger:#ff7a7a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:920px;margin:24px auto;padding:16px}
+  header h1{margin:0 0 8px;font-weight:800;letter-spacing:.2px}
+  header p{margin:0 0 16px;color:var(--muted)}
+  .grid{display:grid;gap:12px;grid-template-columns:1fr}
+  @media(min-width:860px){.grid{grid-template-columns:2fr 1fr}}
+  .card{background:linear-gradient(180deg,#161b24,#121621);border:1px solid #232935;border-radius:14px;padding:16px}
+  .controls label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+  .controls input[type="number"], .controls select{
+    width:100%;padding:10px;border-radius:10px;background:#0e1219;border:1px solid #2a3140;color:var(--ink)
+  }
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .check{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;margin-top:8px}
+  .stage{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    min-height:320px;border-radius:14px;background:radial-gradient(1200px 300px at 50% -20%,rgba(122,209,255,.06),transparent),
+    linear-gradient(180deg,#0f121a,#0c0f16);border:1px solid #232935; position:relative;overflow:hidden
+  }
+  .bubble{
+    width:180px;height:180px;border-radius:999px;border:2px solid #273043;
+    box-shadow:0 0 0 0 rgba(122,209,255,.55) inset;transition:transform .5s ease, box-shadow .5s ease
+  }
+  .phase{font-size:28px;font-weight:800;letter-spacing:.4px}
+  .nostril{font-size:14px;color:var(--muted);letter-spacing:.3px}
+  .timer{font-size:48px;font-weight:900}
+  .progress{height:10px;background:#0e1218;border:1px solid #22293a;border-radius:999px;overflow:hidden}
+  .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .btns{display:flex;gap:8px;flex-wrap:wrap}
+  button{
+    background:#0e1219;border:1px solid #2a3140;color:var(--ink);padding:10px 14px;border-radius:10px;
+    cursor:pointer;font-weight:600
+  }
+  button.primary{border-color:#2c4055;background:#132033}
+  button.danger{border-color:#44282b;background:#1b0f11;color:#ffd4d4}
+  .muted{color:var(--muted)}
+  .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted)}
+  footer{margin-top:12px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Alternate Nostril Breathing Timer</h1>
+    <p>Set 4–8s phases • goal <strong>20:00</strong> by default • Space = start/pause • R = reset</p>
+  </header>
 
+  <div class="grid">
+    <!-- LEFT: Live Stage -->
+    <section class="card stage" id="stage">
+      <div class="bubble" id="bubble"></div>
+      <div class="phase" id="phaseText">Ready</div>
+      <div class="nostril" id="nostrilText">—</div>
+      <div class="timer" id="countdown">00</div>
+      <div class="progress" style="width:86%;"><div class="bar" id="bar"></div></div>
+      <div class="btns">
+        <button class="primary" id="startBtn">Start</button>
+        <button id="pauseBtn">Pause</button>
+        <button class="danger" id="resetBtn">Reset</button>
+      </div>
+      <footer>Session: <span id="elapsed">00:00</span> / <span id="goalLabel">20:00</span> • Interval chime every <span id="chimeEveryLabel">5</span> min</footer>
+    </section>
+
+    <!-- RIGHT: Controls -->
+    <aside class="card controls">
+      <div class="row3">
+        <div>
+          <label>Inhale (sec)</label>
+          <input id="inhSec" type="number" min="4" max="8" value="4" />
+        </div>
+        <div>
+          <label>Hold (sec)</label>
+          <input id="holdSec" type="number" min="0" max="8" value="4" />
+        </div>
+        <div>
+          <label>Exhale (sec)</label>
+          <input id="exhSec" type="number" min="4" max="8" value="6" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <div>
+          <label>Second Hold (sec)</label>
+          <input id="hold2Sec" type="number" min="0" max="8" value="0" />
+        </div>
+        <div>
+          <label>Goal (minutes)</label>
+          <input id="goalMin" type="number" min="1" max="120" value="20" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <div>
+          <label>Interval Chime (minutes)</label>
+          <input id="chimeEvery" type="number" min="1" max="30" value="5" />
+        </div>
+        <div>
+          <label>Guidance Mode</label>
+          <select id="mode">
+            <option value="anb" selected>Alternate Nostril</option>
+            <option value="box">Standard (In-Hold-Ex-Hold)</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="check"><input id="soundOn" type="checkbox" checked /> Soft chime on phase change</label>
+      <label class="check"><input id="vibrateOn" type="checkbox" /> Vibrate on change (mobile)</label>
+      <p class="muted" style="margin-top:10px">
+        Tip: Keep each phase 4–8s. For **ANB**, the app cues Left / Right automatically.<br/>
+        Shortcuts: <span class="kbd">Space</span> start/pause • <span class="kbd">R</span> reset.
+      </p>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Elements
+  const phaseText = document.getElementById('phaseText');
+  const nostrilText = document.getElementById('nostrilText');
+  const countdown = document.getElementById('countdown');
+  const elapsedEl = document.getElementById('elapsed');
+  const bar = document.getElementById('bar');
+  const bubble = document.getElementById('bubble');
+  const goalLabel = document.getElementById('goalLabel');
+  const chimeEveryLabel = document.getElementById('chimeEveryLabel');
+
+  const inhSec = document.getElementById('inhSec');
+  const holdSec = document.getElementById('holdSec');
+  const exhSec = document.getElementById('exhSec');
+  const hold2Sec = document.getElementById('hold2Sec');
+  const goalMin = document.getElementById('goalMin');
+  const chimeEvery = document.getElementById('chimeEvery');
+  const modeSel = document.getElementById('mode');
+  const soundOn = document.getElementById('soundOn');
+  const vibrateOn = document.getElementById('vibrateOn');
+
+  const startBtn = document.getElementById('startBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  // State
+  let running = false, interval = null;
+  let sessionStart = null, pausedAt = null, elapsedMs = 0;
+  let chimeBuckets = 0, lastChimeMin = 0;
+
+  // Audio (WebAudio beep)
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const beep = (dur=0.08, freq=660) => {
+    if(!soundOn.checked) return;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type='sine'; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    o.start(); o.stop(ctx.currentTime + dur);
+  };
+
+  const vibrate = (pattern=[30]) => {
+    if(vibrateOn.checked && navigator.vibrate) navigator.vibrate(pattern);
+  };
+
+  // Phase scheduler
+  let schedule = []; // array of {name, nostril, dur}
+  let phaseIndex = 0, phaseRemaining = 0;
+
+  function buildSchedule(){
+    const IN = clamp(+inhSec.value,4,8);
+    const H1 = clamp(+holdSec.value,0,8);
+    const EX = clamp(+exhSec.value,4,8);
+    const H2 = clamp(+hold2Sec.value,0,8);
+
+    schedule = [];
+    const m = modeSel.value;
+
+    if(m === 'box'){
+      if(IN) schedule.push({name:'Inhale', nostril:'—', dur:IN});
+      if(H1) schedule.push({name:'Hold', nostril:'—', dur:H1});
+      if(EX) schedule.push({name:'Exhale', nostril:'—', dur:EX});
+      if(H2) schedule.push({name:'Hold', nostril:'—', dur:H2});
+    } else {
+      // Alternate Nostril sequence (L in → hold → R out → hold → R in → hold → L out → hold → repeat)
+      if(IN) schedule.push({name:'Inhale', nostril:'Left', dur:IN});
+      if(H1) schedule.push({name:'Hold', nostril:'Center', dur:H1});
+      if(EX) schedule.push({name:'Exhale', nostril:'Right', dur:EX});
+      if(H2) schedule.push({name:'Hold', nostril:'Center', dur:H2});
+      if(IN) schedule.push({name:'Inhale', nostril:'Right', dur:IN});
+      if(H1) schedule.push({name:'Hold', nostril:'Center', dur:H1});
+      if(EX) schedule.push({name:'Exhale', nostril:'Left', dur:EX});
+      if(H2) schedule.push({name:'Hold', nostril:'Center', dur:H2});
+    }
+    if(schedule.length===0){ schedule=[{name:'Inhale',nostril:'—',dur:4}]; }
+    phaseIndex = 0;
+    phaseRemaining = schedule[0].dur;
+    updatePhaseUI();
+  }
+
+  function clamp(n,min,max){ return Math.max(min, Math.min(max, (isFinite(n)?n:min))); }
+
+  function formatTime(ms){
+    const s = Math.floor(ms/1000);
+    const m = Math.floor(s/60);
+    const sec = s%60;
+    return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  }
+
+  function goalMs(){ return Math.max(1, +goalMin.value) * 60_000; }
+
+  function updatePhaseUI(){
+    const p = schedule[phaseIndex] || {name:'Ready',nostril:'—',dur:0};
+    phaseText.textContent = p.name;
+    nostrilText.textContent = p.nostril === '—' ? '—' : `${p.nostril} nostril`;
+    countdown.textContent = String(Math.ceil(phaseRemaining)).padStart(2,'0');
+    // Bubble animation
+    let scale = 1;
+    if(p.name === 'Inhale') scale = 1.15;
+    else if(p.name === 'Exhale') scale = 0.9;
+    else scale = 1.0;
+    bubble.style.transform = `scale(${scale})`;
+    bubble.style.boxShadow = p.name==='Hold'
+      ? '0 0 0 12px rgba(182,255,156,.08) inset'
+      : '0 0 0 0 rgba(122,209,255,.55) inset';
+  }
+
+  function tick(){
+    const now = Date.now();
+    const base = pausedAt || sessionStart || now;
+    const total = elapsedMs + (running ? (now - base) : 0);
+    elapsedEl.textContent = formatTime(total);
+    const gMs = goalMs();
+    bar.style.width = `${Math.min(100, (total/gMs)*100)}%`;
+
+    // interval chime
+    const chEvery = Math.max(1, +chimeEvery.value);
+    const mins = Math.floor(total / 60000);
+    if(mins !== 0 && mins % chEvery === 0 && mins !== lastChimeMin){
+      chimeBuckets++;
+      lastChimeMin = mins;
+      beep(0.08, 520); setTimeout(()=>beep(0.08, 660),120);
+      vibrate([25,60,25]);
+    }
+
+    // phase countdown per second
+    staticSecondTimer.next(t=>{
+      phaseRemaining -= 1;
+      if(phaseRemaining <= 0){
+        // next phase
+        phaseIndex = (phaseIndex + 1) % schedule.length;
+        phaseRemaining = schedule[phaseIndex].dur;
+        updatePhaseUI();
+        beep(0.06, 760);
+        vibrate([30]);
+      } else {
+        countdown.textContent = String(Math.ceil(phaseRemaining)).padStart(2,'0');
+      }
+    });
+
+    // end session when goal reached (soft stop)
+    if(total >= gMs){
+      stop();
+      phaseText.textContent = 'Complete';
+      nostrilText.textContent = 'Nice work.';
+      countdown.textContent = '00';
+      bubble.style.transform = 'scale(1)';
+    }
+  }
+
+  const staticSecondTimer = (function(){
+    // Ensures we run our "per second" actions roughly once per second independent of requestAnimationFrame
+    let last = Date.now();
+    return {
+      next(cb){
+        const now = Date.now();
+        if(now - last >= 1000){
+          last += 1000 * Math.floor((now - last)/1000);
+          cb();
+        }
+      }
+    };
+  })();
+
+  function start(){
+    if(running) return;
+    if(!sessionStart) sessionStart = Date.now();
+    if(pausedAt){ elapsedMs += Date.now() - pausedAt; pausedAt = null; }
+    running = true;
+    interval = setInterval(tick, 100); // UI smoothness
+    startBtn.disabled = true; pauseBtn.disabled = false;
+  }
+
+  function pause(){
+    if(!running) return;
+    running = false;
+    pausedAt = Date.now();
+    clearInterval(interval);
+    startBtn.disabled = false; pauseBtn.disabled = true;
+  }
+
+  function stop(){
+    running = false;
+    clearInterval(interval);
+    startBtn.disabled = false; pauseBtn.disabled = true;
+  }
+
+  function reset(){
+    stop();
+    sessionStart = null; pausedAt = null; elapsedMs = 0; lastChimeMin = 0; chimeBuckets = 0;
+    elapsedEl.textContent = '00:00';
+    bar.style.width = '0%';
+    buildSchedule();
+  }
+
+  // Wiring
+  startBtn.addEventListener('click', start);
+  pauseBtn.addEventListener('click', pause);
+  resetBtn.addEventListener('click', reset);
+
+  [inhSec, holdSec, exhSec, hold2Sec, goalMin, chimeEvery, modeSel].forEach(el=>{
+    el.addEventListener('change', ()=>{
+      goalLabel.textContent = formatTime(goalMs());
+      chimeEveryLabel.textContent = Math.max(1, +chimeEvery.value);
+      buildSchedule();
+    });
+  });
+
+  window.addEventListener('keydown', e=>{
+    if(e.code==='Space'){ e.preventDefault(); running ? pause() : start(); }
+    if(e.key==='r' || e.key==='R'){ reset(); }
+  });
+
+  // Init
+  goalLabel.textContent = formatTime(goalMs());
+  chimeEveryLabel.textContent = Math.max(1, +chimeEvery.value);
+  buildSchedule();
+})();
+</script>
+</body>
+</html>
+  </div>
+
+  <!-- CONTENT SECTION -->
+  <section id="content" style="max-width:800px;margin:60px auto;padding:0 20px;line-height:1.6;">
+    <h1>Two-Job Reduced Sleep System</h1>
+    <p><em>For people running double shifts and still chasing better days.</em></p>
+
+    <h2>Intent First</h2>
+    <p>Before you breathe, before you write—set your target. <strong>"I rest to reset."</strong> Intent is the steering wheel. Without it, the body drifts.</p>
+
+    <h2>Alternate Nostril Breathing</h2>
+    <p>You’re not meditating—you’re resetting the wiring. Inhale left, exhale right, 4–8 seconds. Each breath tells your system: <strong>Calm is power.</strong></p>
+
+    <h2>Dump the Thoughts</h2>
+    <p>Pen and paper. No filters. Start with your intent, then spill the junk. The page takes the noise so your brain can do repairs.</p>
+
+    <h2>Detachment</h2>
+    <p>Catch the tricks: <em>"My mind says I’m done," "My mind says this won’t work."</em> Label it. Watch it lose its bite. You’re the operator, not the echo.</p>
+
+    <h2>Real-World Sleep Reality</h2>
+    <p>Forget the fantasy eight hours. You adapt. Quality beats quantity. Breath, intent, awareness—your three-hour armor.</p>
+
+    <h2>90-Minute Coffee Rule</h2>
+    <p>Wait before caffeine. Let your body wake itself first, then back it up with coffee. Use it like a weapon, not a crutch.</p>
+
+    <h2>Morning Oxygen Reset</h2>
+    <p>Five minutes. Shake, bounce, move. Flood the body with air, shake out the night. Say it again: <strong>"I’m awake, alert, and steady."</strong></p>
+  </section>
+</body>
